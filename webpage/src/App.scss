@@ -1,0 +1,22 @@
+@import "~antd/dist/antd";
+@import "~react-vis/dist/style";
+
+.App {
+    text-align: center;
+    background-color: #ececec;
+    min-height: 100vh;
+}
+
+.Card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    width: 200px;
+    transition: 0.3s;
+}
+
+.Card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-shadow {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
