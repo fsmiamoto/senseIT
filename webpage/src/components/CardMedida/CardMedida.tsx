@@ -1,4 +1,6 @@
-import { Card, Col, Icon, Row, Statistic } from "antd";
+import { faThermometerHalf, faTint } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Card, Col, Row, Statistic } from "antd";
 import * as React from "react";
 
 export interface ICardMedidaState {
@@ -29,7 +31,12 @@ export default class CardMedida extends React.Component<{}, ICardMedidaState> {
                             title="Temperatura"
                             decimalSeparator=","
                             value={this.state.temp}
-                            prefix={<Icon type="fire" />}
+                            prefix={
+                                <FontAwesomeIcon
+                                    icon={faThermometerHalf}
+                                    style={{ marginRight: "10px" }}
+                                />
+                            }
                             suffix="°C"
                         />
                     </Card>
@@ -40,7 +47,12 @@ export default class CardMedida extends React.Component<{}, ICardMedidaState> {
                             title="Umidade"
                             decimalSeparator=","
                             value={this.state.hum}
-                            prefix={<Icon type="thunderbolt" />}
+                            prefix={
+                                <FontAwesomeIcon
+                                    icon={faTint}
+                                    style={{ marginRight: "10px" }}
+                                />
+                            }
                             suffix="%"
                         />
                     </Card>

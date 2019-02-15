@@ -1,9 +1,9 @@
-import { Icon, Layout, Menu } from "antd";
 import * as React from "react";
 
+import { Col, Row } from "antd";
 import moment from "moment";
-import CardMedida from "../CardMedida/CardMedida";
-import { Grafico } from "../Grafico";
+import CardMedida from "../../components/CardMedida/CardMedida";
+import { Grafico } from "../../components/Grafico/Grafico";
 
 const server = "http://192.168.100.200:80";
 
@@ -35,15 +35,21 @@ export default class Dashboard extends React.Component<
     }
 
     public render() {
-        const grafData = this.state.tempPoints.map((point, index) => ({
-            x: point.temp,
-            y: index,
+        // TODO: Implementar gráfico
+        const grafData = this.state.tempPoints.map((point) => ({
+            time: point.time.format("HH:mm"),
+            amt: point.temp,
         }));
         return (
             <>
-                <h1>Olá, Fulano!</h1>
-                <CardMedida />
-                <Grafico data={grafData} />
+                <Row>
+                    <h1>Olá, Fulano!</h1>
+                </Row>
+                <Row>
+                    <Col span={12}>
+                        <CardMedida />
+                    </Col>
+                </Row>
             </>
         );
     }

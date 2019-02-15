@@ -1,14 +1,16 @@
+import { faHome, faSlidersH } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, Router } from "@reach/router";
 import { Icon, Layout, Menu } from "antd";
 import * as React from "react";
 import "./App.scss";
 
 // Views
-import Config from "./Config/Config";
-import Dashboard from "./Dashboard/Dashboard";
 import { Logo } from "./style";
+import Config from "./views/Config/Config";
+import Dashboard from "./views/Dashboard/Dashboard";
 
-import logoImg from "./logo.png";
+import logoImg from "./assets/logo.png";
 
 const { Content, Sider } = Layout;
 
@@ -25,13 +27,20 @@ export default class App extends React.Component<{}, {}> {
                     >
                         <Menu.Item key="1">
                             <Link to="/dashboard">
-                                <Icon type="dashboard" />
+                                {/* <Icon type="dashboard" /> */}
+                                <FontAwesomeIcon
+                                    icon={faHome}
+                                    style={{ marginRight: "10px" }}
+                                />
                                 Dashboard
                             </Link>
                         </Menu.Item>
                         <Menu.Item key="2">
                             <Link to="/config">
-                                <Icon type="setting" />
+                                <FontAwesomeIcon
+                                    icon={faSlidersH}
+                                    style={{ marginRight: "10px" }}
+                                />
                                 Configurações
                             </Link>
                         </Menu.Item>
