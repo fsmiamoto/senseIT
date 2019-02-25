@@ -2,10 +2,8 @@ import * as React from "react";
 
 import { Col, Row } from "antd";
 import moment from "moment";
-import CardMedida from "../../components/CardMedida/CardMedida";
-import { Grafico } from "../../components/Grafico/Grafico";
-
-const server = "http://192.168.100.200:80";
+import CardsMedidas from "../../components/CardsMedidas/CardsMedidas";
+import { getMedidas } from "../../services/API";
 
 interface IDashboardProps {
     default: boolean;
@@ -26,20 +24,16 @@ export default class Dashboard extends React.Component<
     constructor(props: IDashboardProps) {
         super(props);
         this.state = {
-            temp: 0,
             hum: 0,
-            tempPoints: [],
             humPoints: [],
+            temp: 0,
+            tempPoints: [],
         };
-        setInterval(this.getMedidas, 5000);
+        this.atualizaMedidas();
+        setInterval(this.atualizaMedidas, 5000);
     }
 
     public render() {
-        // TODO: Implementar gráfico
-        const grafData = this.state.tempPoints.map((point) => ({
-            time: point.time.format("HH:mm"),
-            amt: point.temp,
-        }));
         return (
             <>
                 <Row>
@@ -47,22 +41,24 @@ export default class Dashboard extends React.Component<
                 </Row>
                 <Row>
                     <Col span={12}>
-                        <CardMedida />
+                        <CardsMedidas
+                            temp={this.state.temp}
+                            hum={this.state.hum}
+                        />
                     </Col>
                 </Row>
             </>
         );
     }
 
-    private getMedidas = async () => {
-        // Pega dados do servidor
-        const response = await fetch(server);
-        // Obtém temp e hum do JSON
-        const { temp, hum } = await response.json();
-        // Atualiza vetor de pontos
+    private atualizaMedidas = async () => {
+        const { temp, hum } = await getMedidas();
+
+        // Atualiza array de pontos
         const agora = moment();
         this.state.tempPoints.push({ temp, time: agora });
         this.state.humPoints.push({ hum, time: agora });
+
         // Atualiza estado com valores atuais
         this.setState({ temp, hum });
     }
