@@ -32,7 +32,7 @@ LiquidCrystal lcd(34,36,38,46,42,44);
 EthernetServer server(80);
 EthernetClient client;
 
-// JSON para os medidasSensores dos sensores
+// JSON para os medições dos sensores
 StaticJsonBuffer<200> jsonBuffer;
 JsonObject& medidasSensores = jsonBuffer.createObject();
 
@@ -106,7 +106,7 @@ void loop() {
                 httpReq.concat(c);
 
                 if (c == '\n' && currentLineIsBlank) {
-                    if(httpContem("GET /sensors")) { enviaJsonSensores(client); } 
+                    if(httpContem("GET /sensors")) { enviaJsonSensores(); } 
                     break;
                 }
 
@@ -148,7 +148,7 @@ void atualizaJsonSensores(){
 /* 
  * enviaJsonSensores - Envia resposta HTTP com JSON dos sensores
 */
-void enviaJsonSensores(EthernetClient client){
+void enviaJsonSensores(){
     client.println("HTTP/1.1 200 OK");
     client.println("Content-Type: application/json");
     client.println("Access-Control-Allow-Origin: *");
