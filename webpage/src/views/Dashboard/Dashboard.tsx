@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import { Col, Row } from "antd";
+import { Button, Col, Row } from "antd";
 import moment from "moment";
 import CardsMedidas from "../../components/CardsMedidas/CardsMedidas";
-import { getMedidas } from "../../services/API";
+import { getMedidas, sendIp } from "../../services/API";
 
 interface IDashboardProps {
     default: boolean;
@@ -46,6 +46,11 @@ export default class Dashboard extends React.Component<
                             hum={this.state.hum}
                         />
                     </Col>
+                </Row>
+                <Row>
+                    <Button onClick={() => sendIp({ ip: "192.168.1.90" })}>
+                        Clique aqui!
+                    </Button>
                 </Row>
             </>
         );

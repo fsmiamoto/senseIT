@@ -33,8 +33,10 @@ EthernetServer server(80);
 EthernetClient client;
 
 // JSON para os medições dos sensores
-StaticJsonBuffer<200> jsonBuffer;
-JsonObject& medidasSensores = jsonBuffer.createObject();
+StaticJsonBuffer<200> jsonBufferRes;
+StaticJsonBuffer<200> jsonBufferReq;
+JsonObject& medidasSensores = jsonBufferRes.createObject();
+
 
 // Buffer para HTTP
 String httpReq;
@@ -45,10 +47,11 @@ int hum;
 int gas;
 
 void setup() {
-    // Inicialização dos sensores e display
+    // Inicialização dos sensores
     dht.begin();
-    lcd.begin(20, 4);
+
     // Imprime texto base no LCD
+    lcd.begin(20, 4);
     lcd.setCursor(0, 0);
     lcd.print("Temperatura: ");
     lcd.setCursor(0, 1);
@@ -57,6 +60,7 @@ void setup() {
     lcd.print("        Gas: ");
     lcd.setCursor(0, 3);
     lcd.print("IP:  192.168.100.200");
+    
     // Inicia porta serial
     Serial.begin(9600);
     while (!Serial) {
@@ -64,49 +68,49 @@ void setup() {
     }
     Serial.println("Ethernet WebServer Example");
 
-    // start the Ethernet connection and the server:
+    // Inicia conexão ethernet
     Ethernet.begin(mac, ip);
 
-    // Check for Ethernet hardware present
-    if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-        Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
-        while (true) {
-            delay(1); // do nothing, no point running without Ethernet hardware
-        }
-    }
     if (Ethernet.linkStatus() == LinkOFF) {
-        Serial.println("Ethernet cable is not connected.");
+        Serial.println("Cabo ethernet desconectado!");
     }
 
-    // start the server
+    // Inicia servidor
     server.begin();
-    Serial.print("server is at ");
+    Serial.print("Servidor disponível em: ");
     Serial.println(Ethernet.localIP());
 }
 
 
 void loop() {
-
     leSensores();
     atualizaJsonSensores();
     atualizaLCD();
+    atendeRequisicao();
+}
 
+/*
+ * atendeRequisicao - Função que gera respostas à requisições HTTP
+*/
+void atendeRequisicao(){
     // Verifica por clientes
     client = server.available(); 
-
     // Limpa buffer de requisção
     httpReq = "";
 
     if (client) {
         bool currentLineIsBlank = true;
+        httpReq = "";
         while (client.connected()) {
             if (client.available()) {
                 // Lê requisição
                 char c = client.read();
+                Serial.print(c);
                 httpReq.concat(c);
 
+                // TODO: Revisar detecção do fim da requisição
                 if (c == '\n' && currentLineIsBlank) {
-                    if(httpContem("GET /sensors")) { enviaJsonSensores(); } 
+                    enviaResposta();
                     break;
                 }
 
@@ -119,11 +123,25 @@ void loop() {
                 }
             }
         }
-        // give the web browser time to receive the data
-        delay(1);
-        // close the connection:
-        client.stop();
-        Serial.println("client disconnected");
+    }
+    delay(1);
+    client.stop();
+}
+
+/** 
+ * enviaResposta - Envia resposta apropriada à página Web
+*/
+void enviaResposta(){
+    client.println("HTTP/1.1 200 OK");
+    client.println("Access-Control-Allow-Origin: *");
+    if(httpContem("GET /sensors")){
+        enviaJsonSensores();
+    }
+    else if(httpContem("POST /ip")){
+        recebeIp();
+    }
+    else if(httpContem("OPTIONS /ip")){
+        enviaOpcoes();
     }
 }
 
@@ -149,13 +167,44 @@ void atualizaJsonSensores(){
  * enviaJsonSensores - Envia resposta HTTP com JSON dos sensores
 */
 void enviaJsonSensores(){
-    client.println("HTTP/1.1 200 OK");
     client.println("Content-Type: application/json");
-    client.println("Access-Control-Allow-Origin: *");
     client.println("Connection: close");
     client.println("Refresh: 5");
     client.println();
     medidasSensores.prettyPrintTo(client); 
+}
+
+void recebeIp(){
+    char c;
+    do{
+        c = client.read();
+        if(c != -1)
+            httpReq.concat(c);
+    }while(c != -1);
+
+    Serial.println(pegaJsonHttpReq());
+    client.println("Content-Type: text/plain");
+    client.println("Connection: close");
+    client.println();
+    client.println("IP Atualizado");
+    client.println();
+}
+
+void enviaOpcoes(){
+    client.println("Content-Type: text/plain");
+    client.println("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+    client.println("Access-Control-Allow-Headers: Content-Type");
+    client.println("Connection: Keep-Alive");
+    client.println();
+}
+
+/*
+ * pegaJsonHttpReq - Obtém texto Json da requisição HTTP
+*/
+String pegaJsonHttpReq(){
+    const int comeco = httpReq.indexOf('{');
+    const int fim = httpReq.indexOf('}');
+    return httpReq.substring(comeco,fim);
 }
 
 /* 
@@ -180,8 +229,8 @@ void atualizaLCD(){
 }
 
 /*
- * httpContem - Procura por uma substring dentro de um vetor de caracteres
- * Retorna 1 caso encontre e 0 caso contrário
+ * httpContem - Procura por uma substring dentro da requisição
+ * Caso encontre, retorna 1 e caso contrário, retorna 0.
  */ 
 const int httpContem(String search){ 
     if( httpReq.indexOf(search) == -1)
