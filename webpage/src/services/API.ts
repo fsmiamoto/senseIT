@@ -18,6 +18,7 @@ export const getMedidas = async () => {
 export const sendIp = async (ip: any) => {
     try {
         const response = await api.post("/ip", ip);
+        console.log(response);
         return response;
     } catch (e) {
         return e;
